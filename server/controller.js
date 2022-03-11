@@ -11,7 +11,7 @@ const sequelize = new Sequelize(CONNECTION_STRING, {
     }
   })
 
-
+//Try const
 
 module.exports = {
     seed: (req, res) => {
