@@ -1,5 +1,6 @@
 require('dotenv').config()
 const {CONNECTION_STRING} = process.env
+//const req = require('express/lib/request')
 const Sequelize = require('sequelize')
 
 const sequelize = new Sequelize(CONNECTION_STRING, {
@@ -28,7 +29,7 @@ module.exports = {
                 city_id SERIAL PRIMARY KEY,
                 name VARCHAR(200),
                 rating INTEGER,
-                country_id INTEGER NOT NULL REFERENCES countries(country_id)
+                country_id INTEGER REFERENCES countries(country_id)
 
             );
 
@@ -241,11 +242,10 @@ module.exports = {
     },
 
     createCity: (req, res) => {
-        const {name, rating, countryid} = req.body 
-
-        sequelize.query(`insert into cities (country_id, name, rating,)
-        values (${countryid},'${name}',${rating},)
-        returning *;`)
+        const {name, rating, countryId} = req.body; 
+        console.log(`${name}, ${rating}, ${countryId} `)
+        sequelize.query(`insert into cities(name, rating, country_id)
+        values('${name}', ${rating}, ${countryId});`)
             .then(dbRes => res.status(200).send(dbRes[0]))
             .catch(err => console.log(err))
 
@@ -254,17 +254,18 @@ module.exports = {
     },
 
     getCities: (req, res) => {
-
-        sequelize.query(`select * from cities AS ci join countries AS co where co.country_id = ${countryid};`)
-        .then(dbRes => res.status(200).send(dbRes[0]))
-        .catch(err => console.log(err))
+         
+         sequelize.query(`select ci.city_id, ci.name AS city, ci.rating, co.country_id, co.name AS country from cities AS ci
+         join countries co on ci.country_id = co.country_id order by rating desc;`)
+            .then(dbRes => res.status(200).send(dbRes[0]))
+            .catch(err => console.log(err))
     },
 
 
     deleteCity: (req, res) => {
-        const {cityId} = req.body
+        const {id} = req.params;
 
-        sequelize.query(`delete from cities where ${cityId}`)
+        sequelize.query(`delete from cities where city_id = ${id};`)
         .then(dbRes => res.status(200).send(dbRes[0]))
         .catch(err => console.log(err))
     }
